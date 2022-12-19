@@ -1,11 +1,17 @@
 package app;
 
+import controls.Label;
 import io.github.humbleui.jwm.*;
 import io.github.humbleui.jwm.skija.EventFrameSkija;
+import io.github.humbleui.skija.Canvas;
 import io.github.humbleui.skija.Surface;
+import misc.CoordinateSystem2i;
 
 import java.io.File;
 import java.util.function.Consumer;
+
+import static app.Color.APP_BACKGROUND_COLOR;
+import static app.Color.PANEL_BACKGROUND_COLOR;
 
 /**
  * Класс окна приложения
@@ -15,45 +21,82 @@ public class Application implements Consumer<Event> {
      * окно приложения
      */
     private final Window window;
-    public enum Platform {
-        WINDOWS,
-        X11,
-        MACOS;
+    /**
+     * отступы панелей
+     */
+    private static final int PANEL_PADDING = 5;
+    /**
+     * радиус скругления элементов
+     */
+    public static final int C_RAD_IN_PX = 4;
+    /**
+     * Первый заголовок
+     */
+    private final Label label;
+    /**
+     * Первый заголовок
+     */
+    private final Label label2;
+    /**
+     * Первый заголовок
+     */
+    private final Label label3;
 
-        public static final Platform CURRENT;
-        static {
-            String os = System.getProperty("os.name").toLowerCase();
-            if (os.contains("mac") || os.contains("darwin"))
-                CURRENT = MACOS;
-            else if (os.contains("windows"))
-                CURRENT = WINDOWS;
-            else if (os.contains("nux") || os.contains("nix"))
-                CURRENT = X11;
-            else
-                throw new RuntimeException("Unsupported platform: " + os);
-        }
-    }
+
     /**
      * Конструктор окна приложения
      */
     public Application() {
+        Label label1;
+
+
         // создаём окно
         window = App.makeWindow();
+
+        // создаём первый заголовок
+        label1 = new Label(window, true, PANEL_BACKGROUND_COLOR, PANEL_PADDING,
+                 "Привет, мир!");
+
+        // создаём второй заголовок
+        label1 = new Label(window, true, PANEL_BACKGROUND_COLOR, PANEL_PADDING,
+                 "Второй заголовок");
+
+        // создаём третий заголовок
+        label1 = new Label(window, true, PANEL_BACKGROUND_COLOR, PANEL_PADDING,
+                "Это тоже заголовок");
+
+
         // задаём обработчиком событий текущий объект
         window.setEventListener(this);
-        // делаем окно видимым
-        window.setVisible(true);
+        // задаём заголовок
         window.setTitle("Java 2D");
         // задаём размер окна
         window.setWindowSize(900, 900);
-// задаём его положение
+        // задаём его положение
         window.setWindowPosition(100, 100);
         // задаём иконку
+
         switch (Platform.CURRENT) {
             case WINDOWS -> window.setIcon(new File("src/main/resources/windows.ico"));
             case MACOS -> window.setIcon(new File("src/main/resources/macos.icns"));
         }
+
+        // создаём первый заголовок
+        label1 = new Label(window, true, PANEL_BACKGROUND_COLOR, PANEL_PADDING,
+                "Привет, мир!");
+
+        // создаём второй заголовок
+        label = label1;
+        label1 = new Label(window, true, PANEL_BACKGROUND_COLOR, PANEL_PADDING,
+                 "Второй заголовок");
+
+        // создаём третий заголовок
+        label2 = label1;
+        label1 = new Label(window, true, PANEL_BACKGROUND_COLOR, PANEL_PADDING,
+                 "Это тоже заголовок");
+
         // названия слоёв, которые будем перебирать
+        label3 = label1;
         String[] layerNames = new String[]{
                 "LayerGLSkija", "LayerRasterSkija"
         };
@@ -74,6 +117,8 @@ public class Application implements Consumer<Event> {
         if (window._layer == null)
             throw new RuntimeException("Нет доступных слоёв для создания");
 
+        // делаем окно видимым
+        window.setVisible(true);
     }
 
     /**
@@ -89,9 +134,30 @@ public class Application implements Consumer<Event> {
             App.terminate();
         } else if (e instanceof EventWindowCloseRequest) {
             window.close();
-        }else if (e instanceof EventFrameSkija ee) {
+        } else if (e instanceof EventFrameSkija ee) {
             Surface s = ee.getSurface();
-            s.getCanvas().clear(0xFF264653);
+            paint(s.getCanvas(), new CoordinateSystem2i(s.getWidth(), s.getHeight()));
         }
+    }
+
+    /**
+     * Рисование
+     *
+     * @param canvas   низкоуровневый инструмент рисования примитивов от Skija
+     * @param windowCS СК окна
+     */
+    public void paint(Canvas canvas, CoordinateSystem2i windowCS) {
+        // запоминаем изменения (пока что там просто заливка цветом)
+        canvas.save();
+        // очищаем канвас
+        canvas.clear(APP_BACKGROUND_COLOR);
+        // рисуем заголовок
+        label.paint(canvas, windowCS);
+        // рисуем второй заголовок
+        label2.paint(canvas, windowCS);
+        // рисуем третий заголовок
+        label3.paint(canvas, windowCS);
+        // восстанавливаем состояние канваса
+        canvas.restore();
     }
 }
