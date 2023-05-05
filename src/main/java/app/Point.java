@@ -1,8 +1,5 @@
 package app;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import misc.Misc;
 import misc.Vector2d;
 
@@ -41,8 +38,7 @@ public class Point {
      * @param pos     положение точки
      * @param setType множество, которому она принадлежит
      */
-    @JsonCreator
-    public Point(@JsonProperty("pos") Vector2d pos, @JsonProperty("setType") PointSet setType) {
+    public Point(Vector2d pos, PointSet setType) {
         this.pos = pos;
         this.pointSet = setType;
     }
@@ -53,7 +49,6 @@ public class Point {
      *
      * @return цвет точки
      */
-    @JsonIgnore
     public int getColor() {
         return switch (pointSet) {
             case FIRST_SET -> Misc.getColor(0xCC, 0x00, 0x00, 0xFF);
@@ -86,7 +81,6 @@ public class Point {
      *
      * @return название множества
      */
-    @JsonIgnore
     public String getSetName() {
         return switch (pointSet) {
             case FIRST_SET -> "Первое множество";

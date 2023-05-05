@@ -1,4 +1,4 @@
-package controls;
+package app;
 
 import controls.MultiLineLabel;
 import io.github.humbleui.jwm.Window;
