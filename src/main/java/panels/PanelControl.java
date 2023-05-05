@@ -1,12 +1,13 @@
 package panels;
 
-import app.Button;
+import controls.Button;
 import app.Point;
 import app.Task;
 import controls.Input;
 import controls.InputFactory;
 import controls.Label;
 import controls.MultiLineLabel;
+import dialogs.PanelInfo;
 import io.github.humbleui.jwm.*;
 import io.github.humbleui.skija.Canvas;
 import misc.CoordinateSystem2i;
@@ -39,6 +40,10 @@ public class PanelControl extends GridPanel {
      * Кнопки
      */
     public List<Button> buttons;
+    /**
+     * кнопка решения
+     */
+    private final Button solve;
 
     /**
      * Панель управления
@@ -120,6 +125,75 @@ public class PanelControl extends GridPanel {
             }
         });
         buttons.add(addToSecondSet);
+
+        // случайное добавление
+        Label cntLabel = new Label(window, false, backgroundColor, PANEL_PADDING,
+                6, 7, 0, 4, 1, 1, "Кол-во", true, true);
+        labels.add(cntLabel);
+
+        Input cntField = InputFactory.getInput(window, false, FIELD_BACKGROUND_COLOR, PANEL_PADDING,
+                6, 7, 1, 4, 2, 1, "5", true,
+                FIELD_TEXT_COLOR, true);
+        inputs.add(cntField);
+
+        Button addPoints = new Button(
+                window, false, backgroundColor, PANEL_PADDING,
+                6, 7, 3, 4, 3, 1, "Добавить\nслучайные точки",
+                true, true);
+        addPoints.setOnClick(() -> {
+            // если числа введены верно
+            if (!cntField.hasValidIntValue()) {
+                PanelLog.warning("кол-во точек указано неверно");
+            } else
+                PanelRendering.task.addRandomPoints(cntField.intValue());
+        });
+        buttons.add(addPoints);
+
+        // управление
+        Button load = new Button(
+                window, false, backgroundColor, PANEL_PADDING,
+                6, 7, 0, 5, 3, 1, "Загрузить",
+                true, true);
+        load.setOnClick(() -> {
+            PanelRendering.load();
+            cancelTask();
+        });
+        buttons.add(load);
+
+        Button save = new Button(
+                window, false, backgroundColor, PANEL_PADDING,
+                6, 7, 3, 5, 3, 1, "Сохранить",
+                true, true);
+        save.setOnClick(PanelRendering::save);
+        buttons.add(save);
+
+        Button clear = new Button(
+                window, false, backgroundColor, PANEL_PADDING,
+                6, 7, 0, 6, 3, 1, "Очистить",
+                true, true);
+        clear.setOnClick(() -> PanelRendering.task.clear());
+        buttons.add(clear);
+
+        solve = new Button(
+                window, false, backgroundColor, PANEL_PADDING,
+                6, 7, 3, 6, 3, 1, "Решить",
+                true, true);
+        solve.setOnClick(() -> {
+            if (!PanelRendering.task.isSolved()) {
+                PanelRendering.task.solve();
+                String s = "Задача решена\n" +
+                        "Пересечений: " + PanelRendering.task.getCrossed().size() / 2 + "\n" +
+                        "Отдельных точек: " + PanelRendering.task.getSingle().size();
+
+                PanelInfo.show(s + "\n\nНажмите Esc, чтобы вернуться");
+                PanelLog.success(s);
+                solve.text = "Сбросить";
+            } else {
+                cancelTask();
+            }
+            window.requestFrame();
+        });
+        buttons.add(solve);
     }
 
     /**
@@ -206,5 +280,14 @@ public class PanelControl extends GridPanel {
         for (Label label : labels) {
             label.paint(canvas, windowCS);
         }
+    }
+
+    /**
+     * Сброс решения задачи
+     */
+    private void cancelTask() {
+        PanelRendering.task.cancel();
+        // Задаём новый текст кнопке решения
+        solve.text = "Решить";
     }
 }
