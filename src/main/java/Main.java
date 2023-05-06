@@ -4,7 +4,7 @@ import io.github.humbleui.jwm.App;
 /**
  * Главный класс приложения
  */
-public class Main {
+public class  Main {
     /**
      * Главный метод приложения
      *

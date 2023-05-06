@@ -1,6 +1,6 @@
 package dialogs;
 
-import app.Application;
+import  app.Application;
 import controls.Button;
 import controls.Input;
 import controls.Label;
